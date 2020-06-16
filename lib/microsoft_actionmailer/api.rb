@@ -34,22 +34,35 @@ module MicrosoftActionmailer
       response
     end
 
-    def make_api_call(endpoint, token, params = nil, req_method)
-      headers = {
-        'Authorization'=> "Bearer #{token}",
-        'Content-Type' => 'application/json'
-      }
-
-      query = params || {}
-      if req_method == 'get'
-        HTTParty.get "#{GRAPH_HOST}#{endpoint}",
-                   headers: headers,
-                   query: query
-      elsif req_method == 'post'
-        HTTParty.post "#{GRAPH_HOST}#{endpoint}",
-                   headers: headers,
-                   body: query.to_json
-      end
+    def make_api_call(token)
+      Excon.post('https://graph.microsoft.com/v1.0/me/sendMail',
+                 body: {
+                   'message': {
+                     'subject': 'Meet for lunch?',
+                     'body': {
+                       'contentType': 'Text',
+                       'content': 'The new cafeteria is open.'
+                     },
+                     'from': {
+                       'emailAddress': {
+                         'address': 'inbox@codeultras.com'
+                       }
+                     },
+                     'toRecipients': [
+                       {
+                         'emailAddress': {
+                           'address': 'artem.kulakov@gmail.com'
+                         }
+                       }
+                     ]
+                   },
+                   'saveToSentItems': 'false'
+                 }.to_json,
+                 headers: {
+                   'Content-Type' => 'application/json',
+                   'Authorization' => "Bearer #{token}"
+                 }
+      )
     end
   end
 end
