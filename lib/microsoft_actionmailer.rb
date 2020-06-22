@@ -10,6 +10,8 @@ module MicrosoftActionmailer
 
   GRAPH_HOST = 'https://graph.microsoft.com'.freeze
 
+  class ApiError < StandardError; end
+
   class DeliveryMethod
     include MicrosoftActionmailer::Api
 
@@ -22,30 +24,29 @@ module MicrosoftActionmailer
     end
 
     def deliver! mail
-      if mail.html_part.present?
-        body = mail.html_part.body.encoded
-      else
-        body = mail.body.encoded
+      body = if mail.html_part.present?
+               mail.html_part.body.encoded
+             else
+               mail.body.encoded
+             end
+
+      before_send = delivery_options[:before_send]
+      if before_send && before_send.respond_to?(:call)
+        before_send.call(mail)
       end
 
-      message = ms_create_message(
+      message = ms_send_mail(
         access_token,
         mail.subject,
         body,
+        mail.from,
         mail.to,
         mail.attachments
       )
 
-      before_send = delivery_options[:before_send]
-      if before_send && before_send.respond_to?(:call)
-        before_send.call(mail, message)
-      end
-
-      ms_send_message(access_token, message['id'])
-
       after_send = delivery_options[:after_send]
       if after_send && after_send.respond_to?(:call)
-        after_send.call(mail, message)
+        after_send.call(mail)
       end
     end
   end
