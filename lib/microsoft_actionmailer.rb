@@ -41,7 +41,8 @@ module MicrosoftActionmailer
         body,
         mail.from,
         mail.to,
-        mail.attachments
+        mail.attachments,
+        mail.reply_to
       )
 
       after_send = delivery_options[:after_send]

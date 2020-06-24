@@ -1,7 +1,7 @@
 module MicrosoftActionmailer
   module Api
     # Sends the mail directly
-    def ms_send_mail(token, subject, content, from_address, addresses, attachments)
+    def ms_send_mail(token, subject, content, from_address, addresses, attachments, reply_to)
       attachment_list = []
       attachments.each do |attachment|
         data = { "@odata.type": "#microsoft.graph.fileAttachment",
@@ -18,6 +18,8 @@ module MicrosoftActionmailer
         recipients << data
       end
 
+      reply_to_recipient = reply_to.present? ? [{ "emailAddress": { "address": reply_to.first } }] : []
+
       query = { "message": {
         "subject": subject,
         "importance": "Normal",
@@ -26,6 +28,7 @@ module MicrosoftActionmailer
           "content": content
         },
         "toRecipients": recipients,
+        "replyTo": reply_to_recipient,
         "from": { "emailAddress": { "address": from_address.first } },
         "attachments": attachment_list
       }}
