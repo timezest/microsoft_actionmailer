@@ -2,7 +2,7 @@ require "microsoft_actionmailer/version"
 require 'microsoft_actionmailer/railtie' if defined?(Rails)
 require 'microsoft_actionmailer/api'
 
-require 'httparty'
+require 'excon'
 require 'net/http'
 require 'uri'
 
@@ -17,9 +17,11 @@ module MicrosoftActionmailer
 
     attr_reader :access_token
     attr_reader :delivery_options
+    attr_reader :proxy
 
     def initialize params
       @access_token = params[:authorization]
+      @proxy = params[:proxy]
       @delivery_options = params[:delivery_options] || {}
     end
 
@@ -37,6 +39,7 @@ module MicrosoftActionmailer
 
       message = ms_send_mail(
         access_token,
+        proxy,
         mail.subject,
         body,
         mail.from,
