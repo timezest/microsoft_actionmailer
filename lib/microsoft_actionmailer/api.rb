@@ -36,7 +36,8 @@ module MicrosoftActionmailer
 
       response = make_api_call('/v1.0/me/sendMail', token, proxy, query, :post)
 
-      raise ApiError.new(JSON.parse(response.body)) || "Request returned #{response.code}" unless response.status == 202
+      raise ApiError.new(parse_error(response)) unless response.status == 202
+
       response
     end
 
@@ -57,6 +58,15 @@ module MicrosoftActionmailer
                    headers: headers,
                    body: query.to_json
       end
+    end
+
+    def parse_error(response)
+      body = if response.body.to_s.empty?
+               "{\"error\":{\"message\":\"Request returned #{response.code}\"}}"
+             else
+               response.body
+             end
+      JSON.parse(body)
     end
   end
 end
