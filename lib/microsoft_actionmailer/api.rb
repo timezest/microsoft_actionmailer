@@ -62,7 +62,7 @@ module MicrosoftActionmailer
 
     def parse_error(response)
       body = if response.body.to_s.empty?
-               "{\"error\":{\"message\":\"Request returned #{response.code}\"}}"
+               "{\"error\":{\"message\":\"Request returned #{response.status}\"}}"
              else
                response.body
              end
